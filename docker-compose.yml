@@ -1,0 +1,27 @@
+version: "3"
+services: 
+    snippetbox:
+        image: "golang:1.14"
+        container_name: "snippetbox"
+        stdin_open: true
+        tty: true
+        ports:
+            - "4000:4000"
+        volumes:
+            - .:/go/src
+            - go_pkg:/go/pkg #persist third party packages, so they dont't have to be downloaded each time
+        environment: 
+            #keep dsn as environment variable save some typing. Start web-app with:
+            # go run ./cmd/web -dsn ${DSN}
+            DSN: "web:web@(snippetbox_db)/snippetbox?parseTime=true"
+        depends_on: [snippetbox_db]
+    snippetbox_db:
+        image: "mysql"
+        container_name: "snippetbox_db"
+        volumes:
+            - snippetbox_data:/var/lib/mysql #persist mysql data
+        environment: 
+            MYSQL_ROOT_PASSWORD: root
+volumes:
+    snippetbox_data:
+    go_pkg:
